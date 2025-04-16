@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Constants;
 
-public class AccountState: IState
+public class AccountState: BaseState
 {
     public void OnEnter()
     {
@@ -16,7 +16,7 @@ public class AccountState: IState
     }
 }
 
-public class AirPortState : IState
+public class AirPortState : BaseState
 {
     public void OnEnter()
     {
@@ -39,77 +39,31 @@ public class AirPortState : IState
     }
 }
 
-public class DutyfreeState : IState
+public class DutyfreeState : BaseState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(3, ()=>
-        {
-            AppManager.Instance.companyId = -999;
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-        });
-    }
-
-    public void OnExit()
-    {
-    }
+    public DutyfreeState() : base(3, setCompanyId: true, joinChannel: true) { }
 }
 
 public class GBSpaceState : IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(4,()=> 
-        {
-            AppManager.Instance.companyId = -999;
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-        });
-    }
-
-    public void OnExit()
-    {
-    }
+    public GBSpaceState() : base(4, setCompanyId: true, joinChannel: true) { }
 }
 
 public class GBProvincialOfficeState : IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(5, ()=>
-        {
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-        });
-    }
-
-    public void OnExit()
-    {
-    }
+    public GBProvincialOfficeState() : base(5, setCompanyId: true, joinChannel: true) { }
 }
 
 public class ConventionLobbyState : IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(6, ()=> 
-        {
-            AppManager.Instance.companyId = -999;
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-        });
-    }
-
-    public void OnExit()
-    {
-    }
+    public ConventionLobbyState() : base(6, setCompanyId: true, joinChannel: true) { }
 }
 
-public class ConventionHallState : IState
+public class ConventionHallState : BaseState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(7);
-    }
+    public ConventionHallState() : base(7) { }
 
-    public void OnExit()
+    public override void OnExit()
     {
         Dictionary<string, object> data = new()
         {
@@ -118,31 +72,28 @@ public class ConventionHallState : IState
         };
 
         GBSocketManager.Instance.SendRTCMessage("conf/leave", data);
-
         AppManager.Instance.conferenceId = 0;
-
         AppManager.Instance.ChangeConventionExitState(ConventionExitState.CONVENTION_HALL);
     }
 }
 
-public class ConventionExhibitionState : IState
+public class ConventionExhibitionState : BaseState
 {
-    public void OnEnter()
+    public ConventionExhibitionState() : base(8, setCompanyId: true, joinChannel: true) { }
+
+    protected override void AfterSceneLoad()
     {
-        SceneLoadManager.Instance.LoadScene(8, () =>
-        {
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-            var _mainPanel = AppManager.Instance.mainPanel;
-            _mainPanel.MapButtonOn(false);
-            _mainPanel.SetShareBtn(false);
-        });
+        var panel = AppManager.Instance.mainPanel;
+        panel.MapButtonOn(false);
+        panel.SetShareBtn(false);
     }
 
-    public void OnExit()
+    public override void OnExit()
     {
-        var _mainPanel = AppManager.Instance.mainPanel;
-        _mainPanel.MapButtonOn(true);
-        _mainPanel.SetShareBtn(true);
+        var panel = AppManager.Instance.mainPanel;
+        panel.MapButtonOn(true);
+        panel.SetShareBtn(true);
+
         Dictionary<string, object> data = new()
         {
             { "userId", AppManager.Instance.myData.userId },
@@ -150,17 +101,13 @@ public class ConventionExhibitionState : IState
         };
 
         GBSocketManager.Instance.SendRTCMessage("booth/leave", data);
-        
         AppManager.Instance.ChangeConventionExitState(ConventionExitState.CONVENTION_EXHIBITION);
     }
 }
 
 public class NomadState : IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(9);
-    }
+    public NomadState() : base(9, setCompanyId: false, joinChannel: false) { }
 
     public void OnExit()
     {
@@ -171,42 +118,17 @@ public class NomadState : IState
 
 public class Dutyfree3DState : IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(10, ()=>
-        {
-            AppManager.Instance.companyId = -999;
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-        });
-    }
-
-    public void OnExit()
-    {
-    }
+    public Dutyfree3DState() : base(10, setCompanyId: true, joinChannel: true) { }
 }
 
 public class DokdoState: IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(11, () => 
-        {
-            AppManager.Instance.companyId = -999;
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-        });
-    }
-
-    public void OnExit()
-    {
-    }
+    public DokdoState() : base(11, setCompanyId: true, joinChannel: true) { }
 }
 
 public class ConventionStartUpSupport: IState
 {
-    public void OnEnter()
-    {
-        SceneLoadManager.Instance.LoadScene(12);
-    }
+    public ConventionStartUpSupport() : base(12, setCompanyId: false, joinChannel: false) { }
 
     public void OnExit()
     {
@@ -224,15 +146,11 @@ public class ConventionStartUpSupport: IState
 
 public class ConventionStartUpExhibition : IState
 {
-    public void OnEnter()
+    public ConventionStartUpExhibition() : base(13, setCompanyId: false, joinChannel: true) 
     {
-        SceneLoadManager.Instance.LoadScene(13, () =>
-        {
-            AgoraChatManager.Instance.JoinChannel(this.ToString());
-            var _mainPanel = AppManager.Instance.mainPanel;
+        var _mainPanel = AppManager.Instance.mainPanel;
             _mainPanel.MapButtonOn(false);
             _mainPanel.SetShareBtn(false);
-        });
     }
 
     public void OnExit()
